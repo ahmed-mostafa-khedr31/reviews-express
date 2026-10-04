@@ -153,7 +153,7 @@ app.put("/api/reviews/:id", async (req, res) => {
   const id = req.params.id;
   const { name, email, company, position, date, review } = req.body;
   try {
-    const review = await Reviews.findByIdAndUpdate(id, {
+    const SpecificReview = await Reviews.findByIdAndUpdate(id, {
       name,
       email,
       company,
@@ -161,7 +161,7 @@ app.put("/api/reviews/:id", async (req, res) => {
       date,
       review,
     });
-    res.status(200).json(review);
+    res.status(200).json(SpecificReview);
   } catch (err) {
     res
       .status(500)
@@ -171,14 +171,17 @@ app.put("/api/reviews/:id", async (req, res) => {
 // for patch article
 app.patch("/api/reviews/:id", async (req, res) => {
   const id = req.params.id;
-  const { title, date, review } = req.body;
+  const { name, email, company, position, date, review } = req.body;
   try {
-    const review = await Reviews.findByIdAndUpdate(id, {
-      title,
+    const SpecificReview = await Reviews.findByIdAndUpdate(id, {
+      name,
+      email,
+      company,
+      position,
       date,
       review,
     });
-    res.status(200).json(review);
+    res.status(200).json(SpecificReview);
   } catch (err) {
     res
       .status(500)
