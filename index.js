@@ -10,16 +10,60 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 const Article = require("./models/articles");
 
-mongoose
-  .connect(
-    `mongodb+srv://${process.env.USER_NAME}:${process.env.PASSWORD}@${process.env.CLUSTER_NAME}.sqh4eos.mongodb.net/?appName=${process.env.DATABASE_NAME}`,
-  )
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+const requiredEnv = ["USER_NAME", "PASSWORD", "CLUSTER_NAME", "DATABASE_NAME"];
+
+function getMongoUri() {
+  const missing = requiredEnv.filter((key) => !process.env[key]);
+  if (missing.length) {
+    throw new Error(`Missing environment variables: ${missing.join(", ")}`);
+  }
+
+  const user = encodeURIComponent(process.env.USER_NAME);
+  const password = encodeURIComponent(process.env.PASSWORD);
+  const appName = encodeURIComponent(process.env.DATABASE_NAME);
+  return `mongodb+srv://${user}:${password}@${process.env.CLUSTER_NAME}.sqh4eos.mongodb.net/?appName=${appName}`;
+}
+
+let connectionPromise;
+
+function connectDB() {
+  if (mongoose.connection.readyState === 1) {
+    return Promise.resolve();
+  }
+
+  if (!connectionPromise) {
+    connectionPromise = mongoose
+      .connect(getMongoUri(), {
+        family: 4,
+        serverSelectionTimeoutMS: 8000,
+      })
+      .then(() => {
+        console.log("Connected to MongoDB");
+      })
+      .catch((err) => {
+        connectionPromise = null;
+        throw err;
+      });
+  }
+
+  return connectionPromise;
+}
+
+connectDB().catch((err) => {
+  console.log(err);
+});
+
+app.use("/api", async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(500).json({
+      message: "Database connection failed",
+      error: err.message,
+    });
+  }
+});
 
 app.get("/", (req, res) => {
   res.status(200).render("error", { error: null, message: "Hello World!" });
