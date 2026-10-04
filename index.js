@@ -8,6 +8,7 @@ const PORT = 3000;
 const app = express();
 const allowedOrigins = [
   "https://ahmed-mostafa-3d-portfolio.vercel.app",
+  "https://ahmed-mostafa-3d-portfolio-ten.vercel.app",
   "http://localhost:3000",
   "http://localhost:5173",
   "http://localhost:4173",
