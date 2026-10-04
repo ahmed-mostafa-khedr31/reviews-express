@@ -1,9 +1,13 @@
 require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
+require("ejs");
 const PORT = 3000;
 const app = express();
 app.use(express.json());
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 const Article = require("./models/articles");
 
 mongoose
@@ -18,7 +22,7 @@ mongoose
   });
 
 app.get("/", (req, res) => {
-  res.status(200).render("error.ejs", { error: null, message: "Hello World!" });
+  res.status(200).render("error", { error: null, message: "Hello World!" });
 });
 // app.post("/api/get-sum/:num1/:num2", (req, res) => {
 //   const num1 = req.params.num1;
