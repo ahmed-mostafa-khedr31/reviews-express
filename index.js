@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-const Article = require("./models/articles");
+const Reviews = require("./models/reviews");
 
 const requiredEnv = ["USER_NAME", "PASSWORD", "CLUSTER_NAME", "DATABASE_NAME"];
 
@@ -79,113 +79,125 @@ app.get("/", (req, res) => {
 //   });
 // });
 // for create article
-app.post("/api/articles", async (req, res) => {
+app.post("/api/reviews", async (req, res) => {
   try {
-    const article = new Article({
-      title: req.body.title,
+    const review = new Reviews({
+      name: req.body.name,
+      email: req.body.email,
+      company: req.body.company,
+      position: req.body.position,
       date: req.body.date || new Date(),
-      content: req.body.content,
+      review: req.body.review,
     });
     // for postman we can use the following code:
     // {
-    //   "title": "Test Article",
+    //   "name": "John Doe",
+    //   "email": "john.doe@example.com",
+    //   "company": "Example Inc.",
+    //   "position": "Software Engineer",
     //   "date": "2026-01-01",
-    //   "content": "This is a test article"
+    //   "review": "This is a test review"
     // }
-    await article.save();
-    res.status(200).json({ message: "Article created successfully" });
+    await review.save();
+    res.status(200).json({ message: "Review created successfully" });
   } catch (err) {
     res
       .status(500)
-      .json({ message: "Article creation failed", error: err.message });
+      .json({ message: "Review creation failed", error: err.message });
   }
 });
 // for all articles
-app.get("/api/articles", async (req, res) => {
+app.get("/api/reviews", async (req, res) => {
   try {
-    const articles = await Article.find();
-    const filteredArticles = articles
-      .map((article) => {
+    const reviews = await Reviews.find();
+    const filteredReviews = reviews
+      .map((review) => {
         return {
-          id: article._id,
-          title: article.title,
-          date: article.date.toISOString(),
-          content: article.content,
+          id: review._id,
+          name: review.name,
+          email: review.email,
+          company: review.company,
+          position: review.position,
+          date: review.date.toISOString(),
+          review: review.review,
         };
       })
       .sort((a, b) => {
         return new Date(b.date) - new Date(a.date);
       });
-    res.status(200).json(filteredArticles);
+    res.status(200).json(filteredReviews);
   } catch (err) {
     res
       .status(500)
-      .json({ message: "Article fetching failed", error: err.message });
+      .json({ message: "Review fetching failed", error: err.message });
   }
 });
 // for specific article
-app.get("/api/articles/:id", async (req, res) => {
+app.get("/api/reviews/:id", async (req, res) => {
   const id = req.params.id;
   try {
-    const article = await Article.findById(id);
-    if (!article) {
-      return res.status(404).json({ message: "Article not found" });
+    const review = await Reviews.findById(id);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
     }
-    res.status(200).json(article);
+    res.status(200).json(review);
   } catch (err) {
     res
       .status(500)
-      .json({ message: "Article fetching failed", error: err.message });
+      .json({ message: "Review fetching failed", error: err.message });
   }
 });
 
 // for update article
-app.put("/api/articles/:id", async (req, res) => {
+app.put("/api/reviews/:id", async (req, res) => {
   const id = req.params.id;
-  const { title, date, content } = req.body;
+  const { name, email, company, position, date, review } = req.body;
   try {
-    const article = await Article.findByIdAndUpdate(id, {
-      title,
+    const review = await Reviews.findByIdAndUpdate(id, {
+      name,
+      email,
+      company,
+      position,
       date,
-      content,
+      review,
     });
-    res.status(200).json(article);
+    res.status(200).json(review);
   } catch (err) {
     res
       .status(500)
-      .json({ message: "Article updating failed", error: err.message });
+      .json({ message: "Review updating failed", error: err.message });
   }
 });
 // for patch article
-app.patch("/api/articles/:id", async (req, res) => {
+app.patch("/api/reviews/:id", async (req, res) => {
   const id = req.params.id;
-  const { title, date, content } = req.body;
+  const { title, date, review } = req.body;
   try {
-    const article = await Article.findByIdAndUpdate(id, {
+    const review = await Reviews.findByIdAndUpdate(id, {
       title,
       date,
-      content,
+      review,
     });
-    res.status(200).json(article);
+    res.status(200).json(review);
   } catch (err) {
     res
       .status(500)
-      .json({ message: "Article patching failed", error: err.message });
+      .json({ message: "Review patching failed", error: err.message });
   }
 });
-// for delete article
-app.delete("/api/articles/:id", async (req, res) => {
+// for delete review
+app.delete("/api/reviews/:id", async (req, res) => {
   const id = req.params.id;
   try {
-    const article = await Article.findByIdAndDelete(id);
-    if (!article) {
-      return res.status(404).json({ message: "Article not found" });
+    const review = await Reviews.findByIdAndDelete(id);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
     }
-    res.status(200).json(article);
+    res.status(200).json(review);
   } catch (err) {
     res
       .status(500)
-      .json({ message: "Article deleting failed", error: err.message });
+      .json({ message: "Review deleting failed", error: err.message });
   }
 });
 
