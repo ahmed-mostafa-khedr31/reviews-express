@@ -1,10 +1,33 @@
 require("dotenv").config();
 const path = require("path");
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
 require("ejs");
 const PORT = 3000;
 const app = express();
+const allowedOrigins = [
+  "https://ahmed-mostafa-3d-portfolio.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:4173",
+];
+app.use(
+  cors({
+    origin(origin, callback) {
+      const isPortfolioPreview =
+        typeof origin === "string" &&
+        /^https:\/\/ahmed-mostafa-3d-portfolio(?:-[a-z0-9-]+)?\.vercel\.app$/.test(
+          origin,
+        );
+      if (!origin || allowedOrigins.includes(origin) || isPortfolioPreview) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
+  }),
+);
 app.use(express.json());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
